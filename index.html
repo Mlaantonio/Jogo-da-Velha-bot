@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+  <style>
+  #board {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-gap: 10px;
+    margin-bottom: 10px;
+    margin: 0 auto; /* Centralizar o tabuleiro horizontalmente */
+    width: 240px; /* Ajustar a largura total do tabuleiro */
+  }
+  
+  .cell {
+    width: 70px;
+    height: 50px;
+    background-color: lightgray;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0; /* Remover qualquer texto dentro das células */
+    cursor: pointer;
+  }
+  
+  img {
+    width: 30px;
+    height: 30px;
+  }
+  
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  button {
+    display: inline-block;
+    font-size: 16px;
+    padding: 5px 10px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+  }
+  
+  #status {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 32px;
+    font-weight: bold;
+  }
+  
+  #score {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  #scorec {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  #scoree {
+    text-align: center;
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+  }
+
+  #title {
+    text-align: center;
+    font-family: Impact, fantasy;
+    font-size: 32px;
+    font-weight: bold; 
+  }
+  </style>
+  <script>
+let board = [];
+let currentPlayer;
+let gameActive;
+let score = 0;
+let scorec = 0;
+let scoree = 0;
+
+const winningCombinations = [
+  [0, 1, 2],
+  [3, 4, 5],
+  [6, 7, 8],
+  [0, 3, 6],
+  [1, 4, 7],
+  [2, 5, 8],
+  [0, 4, 8],
+  [2, 4, 6]
+];
+
+function startGame() {
+  board = Array(9).fill("");
+  currentPlayer = "Anarcho-capitalist";
+  gameActive = true;
+  document.getElementById("status").textContent = "";
+  updateBoard();
+
+  // Se for uma partida par, a inteligência começa
+  if (score % 2 === 0) {
+    currentPlayer = "Communist";
+    simulateAIMove();
+  }
+}
+
+function makeMove(cell) {
+  if (!gameActive || board[cell] !== "") return;
+
+  board[cell] = currentPlayer;
+  updateBoard();
+  if (checkWin(currentPlayer)) {
+    endGame(`Player ${currentPlayer} Win!`);
+    score++;
+    document.getElementById("score").textContent = `Freedom: ${score}`;
+    return;
+  } else if (checkTie()) {
+    endGame("Draw!");
+    return;
+  }
+
+  currentPlayer = currentPlayer === "Anarcho-capitalist" ? "Communist" : "Anarcho-capitalist";
+  simulateAIMove();
+}
+
+function simulateAIMove() {
+  const emptyCells = board.reduce((acc, cell, index) => {
+    if (cell === "") acc.push(index);
+    return acc;
+  }, []);
+
+  const randomIndex = Math.floor(Math.random() * emptyCells.length);
+  const aiMove = emptyCells[randomIndex];
+  board[aiMove] = currentPlayer;
+  updateBoard();
+
+  if (checkWin(currentPlayer)) {
+    endGame(`communism win!`);
+    scorec++;
+    document.getElementById("scorec").textContent = `Communism: ${scorec}`;
+    return;
+  } else if (checkTie()) {
+    endGame("Draw!");
+    scoree++;
+    document.getElementById("scoree").textContent = `Draw: ${scoree}`;
+    return;
+  }
+
+  currentPlayer = currentPlayer === "Anarcho-capitalist" ? "Communist" : "Anarcho-capitalist";
+}
+
+function checkWin(player) {
+  for (let i = 0; i < winningCombinations.length; i++) {
+    const [a, b, c] = winningCombinations[i];
+    if (board[a] === player && board[b] === player && board[c] === player) {
+      return true;
+    }
+  }
+  return false;
+}
+
+function checkTie() {
+  return board.every(cell => cell !== "");
+}
+
+function endGame(message) {
+  gameActive = false;
+  document.getElementById("status").textContent = message;
+}
+
+function updateBoard() {
+  const cells = document.getElementsByClassName("cell");
+  for (let i = 0; i < cells.length; i++) {
+    const cell = cells[i];
+    const image = document.createElement("img");
+    image.src = board[i] === "Anarcho-capitalist" ? "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgaLmMPGxyaZS_YYIV_n454FEKnRLN03QlUZDbRNC73gMZ08DvK2vtZ6fPYbIHPm-oChjG9kkRvGzQ7xp1awimv2dQK7AYYYKnnTR5c4F2Sen8RrzcT0YPyQK5LYWENbpM_khgzs7WkPS57Q2nlcLVrERNKpv4A95BfLzLt5m447_5dJ4ITTovbGsio/s1600/x.png" : board[i] === "Communist" ? "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgWOjgLrtK-byEyadV9jZqiKzojtJL2ZiJpsfROwgfF7o-0kBKlbn3jZo8g4ZLYptlhsLWKMRnMRkE-wyjuiuRTF5NdM_wk0aBsUGf3sFX2mqK3AWHE-TqBwjkqPGDbLG3MyRpyJt5Gx6Ic_P8RMKjdvvIeMxhpnKzd6KMcSzXayWr0OSNoNSm_-Kx/s1600/o.png" : "https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png";
+    cell.innerHTML = "";
+    cell.appendChild(image);
+  }
+}
+  </script>  
+  <link href="style.css" rel="stylesheet" type="text/css"></link>
+</head>
+<body>
+  <h1 id="title">Tic-Tac-Toe</h1>
+  <div id="board">
+    <div class="cell" onclick="makeMove(0)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(1)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(2)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(3)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(4)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(5)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(6)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(7)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+    <div class="cell" onclick="makeMove(8)"><img alt="" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" /></div>
+  </div>
+  <div class="container" id="button">
+  <button onclick="startGame()">START</button>
+  </div>
+  <p id="status"></p>
+  <p id="score">Freedom: 0</p>
+  <p id="scorec">Communism: 0</p>
+  <p id="scoree">Draw: 0</p>
+  
+  <script src="script.js"></script>
+</body>
+<p>&nbsp;</p>
+<div class="separator" style="clear: both; text-align: center;">
+    <a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgaLmMPGxyaZS_YYIV_n454FEKnRLN03QlUZDbRNC73gMZ08DvK2vtZ6fPYbIHPm-oChjG9kkRvGzQ7xp1awimv2dQK7AYYYKnnTR5c4F2Sen8RrzcT0YPyQK5LYWENbpM_khgzs7WkPS57Q2nlcLVrERNKpv4A95BfLzLt5m447_5dJ4ITTovbGsio/s30/x.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" data-original-height="30" data-original-width="30" height="30" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEgaLmMPGxyaZS_YYIV_n454FEKnRLN03QlUZDbRNC73gMZ08DvK2vtZ6fPYbIHPm-oChjG9kkRvGzQ7xp1awimv2dQK7AYYYKnnTR5c4F2Sen8RrzcT0YPyQK5LYWENbpM_khgzs7WkPS57Q2nlcLVrERNKpv4A95BfLzLt5m447_5dJ4ITTovbGsio/s1600/x.png" width="30" /></a>
+</div>
+<br />
+<div class="separator" style="clear: both; text-align: center;">
+    <a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgWOjgLrtK-byEyadV9jZqiKzojtJL2ZiJpsfROwgfF7o-0kBKlbn3jZo8g4ZLYptlhsLWKMRnMRkE-wyjuiuRTF5NdM_wk0aBsUGf3sFX2mqK3AWHE-TqBwjkqPGDbLG3MyRpyJt5Gx6Ic_P8RMKjdvvIeMxhpnKzd6KMcSzXayWr0OSNoNSm_-Kx/s30/o.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" data-original-height="30" data-original-width="30" height="30" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhgWOjgLrtK-byEyadV9jZqiKzojtJL2ZiJpsfROwgfF7o-0kBKlbn3jZo8g4ZLYptlhsLWKMRnMRkE-wyjuiuRTF5NdM_wk0aBsUGf3sFX2mqK3AWHE-TqBwjkqPGDbLG3MyRpyJt5Gx6Ic_P8RMKjdvvIeMxhpnKzd6KMcSzXayWr0OSNoNSm_-Kx/s1600/o.png" width="30" /></a>
+</div>
+<br />
+<div class="separator" style="clear: both; text-align: center;">
+    <a href="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s100/fundo.png" imageanchor="1" style="margin-left: 1em; margin-right: 1em;"><img border="0" data-original-height="100" data-original-width="100" height="100" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEhCwITLUt1qTY55YEr9JpNtegOcKTdBLRbhFropzG_hZSTVVU8XKhGg76F6zgNEsQVuQS-WwwMQTvQ7fX_IjZN2u8g0T57IU10oK1tzvNlZqmpNXr6KgFgwEJoA34SoeU4tqp6eC9S96I90gSAZxSgoHZ89Sxl8c0Xi7mmuhsISQS87xe4c39sC8R2E/s1600/fundo.png" width="100" /></a>
+</div>
+<br />
+<p></p>
+
+</html>
